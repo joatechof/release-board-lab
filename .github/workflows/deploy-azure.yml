@@ -1,0 +1,64 @@
+name: Deploy Azure
+on:
+  workflow_dispatch:
+    inputs:
+      digest:
+        description: 'Digest publicado pelo CI, sha256 seguido de 64 caracteres hexadecimais'
+        required: true
+        type: string
+      commit:
+        description: 'SHA completo do commit que originou a imagem'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-lab
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    environment: azure-lab
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - name: Validar parâmetros
+        env:
+          DIGEST: ${{ inputs.digest }}
+          COMMIT: ${{ inputs.commit }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ "$COMMIT" =~ ^[a-f0-9]{40}$ ]]
+          echo "DEPLOY_IMAGE=ghcr.io/${REPOSITORY,,}@$DIGEST" >> "$GITHUB_ENV"
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Aplicar infraestrutura e imagem aprovada
+        env:
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+        run: |
+          URL=$(az deployment group create --resource-group "$RESOURCE_GROUP" \
+            --template-file infra/main.bicep \
+            --parameters containerImage="$DEPLOY_IMAGE" \
+            --query properties.outputs.url.value -o tsv)
+          echo "BASE_URL=$URL" >> "$GITHUB_ENV"
+          echo "Aplicação: $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Confirmar saúde e versão do deploy
+        env:
+          EXPECTED_VERSION: ${{ inputs.commit }}
+        run: node scripts/smoke.mjs

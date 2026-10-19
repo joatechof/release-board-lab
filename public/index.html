@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Release Board · DevOps Lab</title>
+    <link rel="stylesheet" href="/style.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">DEVOPS LAB / 01</p>
+      <header><h1>Release Board</h1><span class="badge">Laboratório</span></header>
+      <p class="intro">Do commit ao serviço. Observa a versão e a instância que responderam a este pedido.</p>
+      <p id="status" role="status">A contactar a aplicação…</p>
+      <section aria-labelledby="runtime-heading">
+        <h2 id="runtime-heading">A aplicação em execução</h2>
+        <dl id="runtime"></dl>
+        <button id="refresh" type="button">Atualizar informação</button>
+      </section>
+      <section aria-labelledby="releases-heading">
+        <h2 id="releases-heading">Histórico de exemplo</h2>
+        <p class="note">Dados fixos para o laboratório. Não representam o histórico real de deploys.</p>
+        <ul id="releases"></ul>
+      </section>
+      <footer>JavaScript · Git · CI/CD · Containers · Kubernetes · Azure</footer>
+    </main>
+  </body>
+</html>

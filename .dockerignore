@@ -1,0 +1,12 @@
+.git
+.github
+node_modules
+.env
+.env.*
+test
+scripts
+infra
+k8s
+README.md
+pnpm-lock.yaml
+Dockerfile
