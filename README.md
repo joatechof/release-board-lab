@@ -70,3 +70,5 @@ O tutorial de estudo entregue na pasta acima deste projeto explica quando usar c
 ## Versões
 
 Alvo: Node.js `22.23.3` e pnpm `11.28.4`. O `Dockerfile` fixa também o digest da imagem base; os workflows fixam os SHAs das actions. Os documentos de ferramentas e validação, entregues com o tutorial, registam datas e o ambiente realmente executado.
+
+Cheers ;)
